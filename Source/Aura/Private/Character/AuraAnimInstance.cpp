@@ -24,5 +24,14 @@ void UAuraAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (AuraCharacter && CharacterMovement)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(CharacterMovement->Velocity);
+
+		if (GroundSpeed > 3.f)
+		{
+			bShouldMove = true;
+		}
+		else
+		{
+			bShouldMove = false;
+		}
 	}
 }
