@@ -6,6 +6,7 @@
 #include "Character/AuraCharacterBase.h"
 #include "AuraCharacter.generated.h"
 
+class AAuraPlayerState;
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -16,10 +17,15 @@ class AURA_API AAuraCharacter : public AAuraCharacterBase
 
 public:
 	AAuraCharacter();
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
 	UPROPERTY(EditDefaultsOnly, Category="Camera")
 	TObjectPtr<UCameraComponent> FollowCamera;
+
+private:
+	void InitAbilityActorInfo();
 };
