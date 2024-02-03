@@ -34,6 +34,9 @@ private:
 	void Move(const FInputActionValue& Value);
 
 	void CursorTrace();
-	TObjectPtr<IEnemyInterface> LastActor;
-	TObjectPtr<IEnemyInterface> ThisActor;
+	// TObjectPtr cannot be used with interfaces since they don't inherit from UObject
+	// there is a possible work around by using TScriptInterface instead but for now
+	// I will just use raw pointers
+	IEnemyInterface* LastActor;
+	IEnemyInterface* ThisActor;
 };

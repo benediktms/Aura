@@ -31,11 +31,13 @@ AAuraEnemy::AAuraEnemy()
 void AAuraEnemy::HighlightActor()
 {
 	GetMesh()->SetRenderCustomDepth(true);
+	checkf(Weapon, TEXT("Weapon is not set in %hs This should never happen."), __FUNCTION__);
 	Weapon->SetRenderCustomDepth(true);
 }
 
 void AAuraEnemy::UnHighlightActor()
 {
 	GetMesh()->SetRenderCustomDepth(false);
+	checkf(Weapon, TEXT("Weapon is not set in %hs This should never happen."), __FUNCTION__);
 	Weapon->SetRenderCustomDepth(false);
 }
