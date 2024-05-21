@@ -44,7 +44,7 @@ struct FEffectProperties
 	ACharacter* TargetCharacter = nullptr;
 
 	UPROPERTY()
-	ACharacter* SouceCharacter = nullptr;
+	ACharacter* SourceCharacter = nullptr;
 
 	FGameplayEffectContextHandle EffectContextHandle;
 };

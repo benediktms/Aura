@@ -94,7 +94,7 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 
 		if (Props.SourceController)
 		{
-			Props.SouceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
+			Props.SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
 		}
 	}
 
