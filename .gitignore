@@ -75,3 +75,6 @@ DerivedDataCache/*
 
 Plugins/Developer/RiderLink/*
 .idea/*.iws
+
+.vscode/
+Aura.code-workspace
