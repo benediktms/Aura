@@ -74,3 +74,11 @@ void AAuraCharacter::OnRep_PlayerState()
 	// Init ability actor info for the client
 	InitAbilityActorInfo();
 }
+
+int32 AAuraCharacter::GetActorLevel()
+{
+	const AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
+	check(AuraPlayerState)
+
+	return AuraPlayerState->GetPlayerLevel();
+}

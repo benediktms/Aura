@@ -47,3 +47,8 @@ void AAuraEnemy::UnHighlightActor()
 	checkf(Weapon, TEXT("Weapon is not set in %hs This should never happen."), __FUNCTION__);
 	Weapon->SetRenderCustomDepth(false);
 }
+
+int32 AAuraEnemy::GetActorLevel()
+{
+	return Level;
+}
