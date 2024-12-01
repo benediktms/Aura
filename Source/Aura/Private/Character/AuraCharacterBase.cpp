@@ -46,5 +46,6 @@ void AAuraCharacterBase::InitializeDefaultAttributes() const
 {
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
+	// Vital attributes need to be initialized last, as they depend on the other attributes
 	ApplyEffectToSelf(DefaultVitalAttributes, 1.f);
 }
