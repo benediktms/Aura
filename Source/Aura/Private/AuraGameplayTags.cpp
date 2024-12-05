@@ -73,13 +73,13 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 		FString("The chance to block an incoming attack, reducing damage taken")
 	);
 
-	GameplayTags.Attributes_Secondary_CriticalChance = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.CriticalChance"),
+	GameplayTags.Attributes_Secondary_CriticalHitChance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Secondary.CriticalHitChance"),
 		FString("The chance to deal a critical hit")
 	);
 
-	GameplayTags.Attributes_Secondary_CriticalDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
-		FName("Attributes.Secondary.CriticalDamage"),
+	GameplayTags.Attributes_Secondary_CriticalHitDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Secondary.CriticalHitDamage"),
 		FString("The amount of damage dealt when a critical hit occurs")
 	);
 
