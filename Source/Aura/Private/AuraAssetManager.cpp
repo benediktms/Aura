@@ -1,18 +1,18 @@
 // Copyright Benedikt Schnatterbeck
 
 
-#include "AuraAssetmanager.h"
+#include "AuraAssetManager.h"
 #include "AuraGameplayTags.h"
 
-UAuraAssetmanager& UAuraAssetmanager::Get()
+UAuraAssetManager& UAuraAssetManager::Get()
 {
 	check(GEngine);
 
-	UAuraAssetmanager* AuraAssetManager = Cast<UAuraAssetmanager>(GEngine->AssetManager);
+	UAuraAssetManager* AuraAssetManager = Cast<UAuraAssetManager>(GEngine->AssetManager);
 	return *AuraAssetManager;
 }
 
-void UAuraAssetmanager::StartInitialLoading()
+void UAuraAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
 
