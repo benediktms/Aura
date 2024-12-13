@@ -19,5 +19,7 @@ protected:
 
 public:
 	void AbilityActorInfoSet();
+	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& StartupAbilities);
+
 	FEffectAssetTags EffectAssetTags;
 };
