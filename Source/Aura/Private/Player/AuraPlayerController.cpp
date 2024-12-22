@@ -99,18 +99,9 @@ void AAuraPlayerController::CursorTrace()
 	LastActor = ThisActor;
 	ThisActor = CursorHit.GetActor();
 
-	if (ThisActor != LastActor)
-	{
-		if (LastActor != nullptr)
-		{
-			LastActor->UnHighlightActor();
-		}
-
-		if (ThisActor != nullptr)
-		{
-			ThisActor->HighlightActor();
-		}
-	}
+	if (ThisActor == LastActor) return;
+	if (LastActor != nullptr) LastActor->UnHighlightActor();
+	if (ThisActor != nullptr) ThisActor->HighlightActor();
 }
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
