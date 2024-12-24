@@ -15,9 +15,12 @@ void UAuraProjectileSpell::ActivateAbility(
 )
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
 
-	const bool bIsServer = HasAuthority(&ActivationInfo);
-	if (!bIsServer)return;
+void UAuraProjectileSpell::SpawnProjectile()
+{
+	// If not on the server, do nothing
+	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
 
 	ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetAvatarActorFromActorInfo());
 	if (!CombatInterface) return;
