@@ -12,6 +12,7 @@ AAuraProjectile::AAuraProjectile()
 	bReplicates = true;
 
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
+	SetRootComponent(Sphere);
 	Sphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Sphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	Sphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
@@ -22,8 +23,6 @@ AAuraProjectile::AAuraProjectile()
 	ProjectileMovement->InitialSpeed = 550.f;
 	ProjectileMovement->MaxSpeed = 550.f;
 	ProjectileMovement->ProjectileGravityScale = 0.f;
-
-	SetRootComponent(Sphere);
 }
 
 void AAuraProjectile::BeginPlay()
