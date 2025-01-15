@@ -17,7 +17,7 @@ void UAuraProjectileSpell::ActivateAbility(
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UAuraProjectileSpell::SpawnProjectile()
+void UAuraProjectileSpell::SpawnProjectile(const FVector& TargetLocation)
 {
 	// If not on the server, do nothing
 	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
@@ -26,10 +26,12 @@ void UAuraProjectileSpell::SpawnProjectile()
 	if (!CombatInterface) return;
 
 	const FVector SocketLocation = CombatInterface->GetCombatSocketLocation();
+	FRotator Rotation = (TargetLocation - SocketLocation).Rotation();
+	Rotation.Pitch = 0.f; // ensure that the projectile is parallel to the ground
 
 	FTransform SpawnTransform;
 	SpawnTransform.SetLocation(SocketLocation);
-	// TODO: set the projectile rotation
+	SpawnTransform.SetRotation(Rotation.Quaternion());
 
 	AAuraProjectile* Projectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 		ProjectileClass,
