@@ -3,8 +3,11 @@
 
 #include "Actor/AuraProjectile.h"
 
+#include "NiagaraFunctionLibrary.h"
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AAuraProjectile::AAuraProjectile()
 {
@@ -28,11 +31,42 @@ AAuraProjectile::AAuraProjectile()
 void AAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	SetLifeSpan(LifeSpan);
+
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AAuraProjectile::OnSphereOverlap);
+
+	TravelSound->Duration = INDEFINITELY_LOOPING_DURATION;
+	TravelSoundAudioComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
 }
 
 void AAuraProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                       const FHitResult& SweepResult)
 {
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+
+	if (HasAuthority())
+	{
+		Destroy();
+	}
+	else
+	{
+		bHasHit = true;
+	}
+}
+
+void AAuraProjectile::Destroyed()
+{
+	if (!bHasHit && !HasAuthority())
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			this, ImpactEffect, GetActorLocation());
+	}
+
+	TravelSoundAudioComponent->Stop();
+
+	Super::Destroyed();
 }
