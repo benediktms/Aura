@@ -38,7 +38,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxManaChangedSignature, float, N
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, const FUIWidgetRow&, Row);
 
-
 UCLASS(BlueprintType, Blueprintable)
 class AURA_API UOverlayWidgetController : public UAuraWidgetController
 {

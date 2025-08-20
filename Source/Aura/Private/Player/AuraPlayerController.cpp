@@ -56,6 +56,8 @@ void AAuraPlayerController::SetupInputComponent()
 	UAuraInputComponent* AuraInputComponent = Cast<UAuraInputComponent>(InputComponent);
 
 	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::ShiftPressed);
+	AuraInputComponent->BindAction(ShiftAction, ETriggerEvent::Started, this, &AAuraPlayerController::ShiftReleased);
 	AuraInputComponent->BindAbilityActions(
 		InputConfig,
 		this,
@@ -118,41 +120,33 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 	UAuraAbilitySystemComponent* ASC = GetASC();
 	if (ASC == nullptr) return;
 
-	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB))
-	{
-		ASC->AbilityInputTagReleased(InputTag);
-		return;
-	}
+	ASC->AbilityInputTagReleased(InputTag);
 
-	if (bTargeting)
-	{
-		ASC->AbilityInputTagReleased(InputTag);
-	}
-	else
-	{
-		const APawn* ControlledPawn = GetPawn();
+	if (!InputTag.MatchesTagExact(FAuraGameplayTags::Get().InputTag_LMB)) return;
+	if (bTargeting || bShiftKeyDown) return;
 
-		UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
-			this,
-			ControlledPawn->GetActorLocation(),
-			CachedDestination
-		);
+	const APawn* ControlledPawn = GetPawn();
 
-		if (FollowTime <= ShortPressThreshold && ControlledPawn && NavPath)
+	UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
+		this,
+		ControlledPawn->GetActorLocation(),
+		CachedDestination
+	);
+
+	if (FollowTime <= ShortPressThreshold && ControlledPawn && NavPath)
+	{
+		PathSpline->ClearSplinePoints();
+		for (const FVector& PointLoc : NavPath->PathPoints)
 		{
-			PathSpline->ClearSplinePoints();
-			for (const FVector& PointLoc : NavPath->PathPoints)
-			{
-				PathSpline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
-			}
-
-			CachedDestination = NavPath->PathPoints.Last();
-			bAutoRunning = true;
+			PathSpline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
 		}
 
-		bTargeting = false;
-		FollowTime = 0.f;
+		CachedDestination = NavPath->PathPoints.Last();
+		bAutoRunning = true;
 	}
+
+	bTargeting = false;
+	FollowTime = 0.f;
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
@@ -166,7 +160,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		return;
 	}
 
-	if (bTargeting)
+	if (bTargeting || bShiftKeyDown)
 	{
 		if (!ASC) return;
 		ASC->AbilityInputTagHeld(InputTag);
