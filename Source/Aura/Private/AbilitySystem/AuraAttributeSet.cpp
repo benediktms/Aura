@@ -96,6 +96,21 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
+
+	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		// cache damage value to method scope at runtime and reset the incoming damage value to stop it from stacking
+		const float IncomingDamageValue = GetIncomingDamage();
+		SetIncomingDamage(0.f);
+
+		if (IncomingDamageValue > 0.f)
+		{
+			const float NewHealth = FMath::Clamp(GetHealth() - IncomingDamageValue, 0.f, GetMaxHealth());
+			SetHealth(NewHealth);
+
+			const bool bFatal = NewHealth <= 0.f;
+		}
+	}
 }
 
 void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
