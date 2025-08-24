@@ -8,7 +8,9 @@
 #include "GameplayEffectExtension.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/AuraPlayerController.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -106,6 +108,8 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
 		if (IncomingDamageValue > 0.f)
 		{
+			ShowFloatingText(Props, IncomingDamageValue);
+
 			const float NewHealth = FMath::Clamp(GetHealth() - IncomingDamageValue, 0.f, GetMaxHealth());
 			SetHealth(NewHealth);
 
@@ -244,5 +248,20 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
 			Props.TargetAvatarActor);
+	}
+}
+
+void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, const float IncomingDamageValue) const
+{
+	const auto Source = Props.SourceCharacter;
+	const auto Target = Props.TargetCharacter;
+
+	if (Source != Target)
+	{
+		if (const auto PC = Cast<
+			AAuraPlayerController>(UGameplayStatics::GetPlayerController(Source, 0)))
+		{
+			PC->ShowDamageNumber(IncomingDamageValue, Target);
+		}
 	}
 }
