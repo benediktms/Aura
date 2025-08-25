@@ -51,7 +51,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& TargetLocation)
 
 	const FAuraGameplayTags GameplayTags = FAuraGameplayTags::Get();
 	const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, ScaledDamage);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Damage, 10.f);
 
 	Projectile->DamageEffectSpecHandle = SpecHandle;
 	Projectile->FinishSpawning(SpawnTransform);
