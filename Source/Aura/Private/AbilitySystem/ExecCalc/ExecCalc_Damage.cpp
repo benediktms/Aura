@@ -4,17 +4,22 @@
 #include "AbilitySystem/ExecCalc/ExecCalc_Damage.h"
 #include "AbilitySystemComponent.h"
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/AuraAbilitySystemLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Interaction/CombatInterface.h"
 
 // not part of the UE reflection system
 struct AuraDamageStatics
 {
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Armor)
+	DECLARE_ATTRIBUTE_CAPTUREDEF(ArmorPenetration)
 	DECLARE_ATTRIBUTE_CAPTUREDEF(BlockChance)
 
 	AuraDamageStatics()
 	{
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, Armor, Target, false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, ArmorPenetration, Source, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UAuraAttributeSet, BlockChance, Target, false);
 	}
 };
@@ -40,8 +45,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
 	UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
 
-	const AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
-	const AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
+	AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
+	ICombatInterface* SourceCombatInterface = Cast<ICombatInterface>(SourceAvatar);
+
+	AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
+	ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(TargetAvatar);
 
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 
@@ -53,16 +61,43 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	float Damage = Spec.GetSetByCallerMagnitude(FAuraGameplayTags::Get().Damage);
 
 	// Capture BlockChance on Target and determine if there was a successful Block
-	float BlockChance = 0.f;
+	float TargetBlockChance = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
-		DamageStatics().BlockChanceDef, EvaluationParameters, BlockChance);
-	BlockChance = FMath::Max(0.f, BlockChance);
+		DamageStatics().BlockChanceDef, EvaluationParameters, TargetBlockChance);
+	TargetBlockChance = FMath::Max(0.f, TargetBlockChance);
 
 	// If Block is successful -> Half the damage
-	const bool bBlocked = FMath::FRand() * 100 <= BlockChance;
-	Damage = FMath::Max(0.f, bBlocked ? Damage / 2 : Damage);
+	const bool bBlocked = FMath::FRand() * 100 <= TargetBlockChance;
+	Damage = bBlocked ? Damage / 2 : Damage;
 
-	FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(),
+	float TargetArmor = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
+		DamageStatics().ArmorDef, EvaluationParameters, TargetArmor);
+	TargetArmor = FMath::Max(0.f, TargetArmor);
+
+	float SourceArmorPen = 0.f;
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(
+		DamageStatics().ArmorPenetrationDef, EvaluationParameters, SourceArmorPen);
+	SourceArmorPen = FMath::Max(0.f, SourceArmorPen);
+
+	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemLibrary::GetCharacterClassInfo(SourceAvatar);
+
+	const FRealCurve* ArmorPenCurve = CharacterClassInfo->DamageCalculationCoefficients->FindCurve(
+		FName("ArmorPenetration"), FString());
+	const float ArmorPenCoefficient = ArmorPenCurve->Eval(SourceCombatInterface->GetActorLevel());
+
+	// it takes 4 armor penetration points to ignore 1 point of armor
+	const float EffectiveArmor = TargetArmor * (100 - SourceArmorPen * ArmorPenCoefficient) / 100;
+
+	const FRealCurve* EffectiveArmorCurve = CharacterClassInfo->DamageCalculationCoefficients->FindCurve(
+		FName("EffectiveArmor"), FString());
+	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(SourceCombatInterface->GetActorLevel());
+
+	// effective armor reduction is scaled down in effectiveness based on source level, e.g. 33%
+	// armor reduces a percentage of the incoming damage
+	Damage *= (100 - EffectiveArmor * EffectiveArmorCoefficient) / 100.f;
+
+	const FGameplayModifierEvaluatedData EvaluatedData(UAuraAttributeSet::GetIncomingDamageAttribute(),
 	                                             EGameplayModOp::Additive, Damage);
 
 	OutExecutionOutput.AddOutputModifier(EvaluatedData);

@@ -253,15 +253,12 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 
 void UAuraAttributeSet::ShowFloatingText(const FEffectProperties& Props, const float IncomingDamageValue) const
 {
-	const auto Source = Props.SourceCharacter;
-	const auto Target = Props.TargetCharacter;
-
-	if (Source != Target)
+	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
 		if (const auto PC = Cast<
-			AAuraPlayerController>(UGameplayStatics::GetPlayerController(Source, 0)))
+			AAuraPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
 		{
-			PC->ShowDamageNumber(IncomingDamageValue, Target);
+			PC->ShowDamageNumber(IncomingDamageValue, Props.TargetCharacter);
 		}
 	}
 }
